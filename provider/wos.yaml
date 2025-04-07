@@ -1,0 +1,34 @@
+identity:
+  author: Sakura4036
+  name: wos
+  label:
+    en_US: wos
+    zh_Hans: wos
+    pt_BR: wos
+  description:
+    en_US: Web of Science
+    zh_Hans: Web of Science
+    pt_BR: Web of Science
+  icon: icon.svg
+credentials_for_provider:
+  wos_api_key:
+    type: secret-input
+    required: true
+    label:
+      en_US: Web of Science API key
+      zh_Hans: Web of Science API key
+      pt_BR: Web of Science API key
+    placeholder:
+      en_US: Please input your  Web of Science API key
+      zh_Hans: 请输入你的  Web of Science API key
+      pt_BR: Please input your  Web of Science API key
+    help:
+      en_US: Get your Web of Science API key from Clarivate
+      zh_Hans: 从 Clarivate 获取您的 Web of Science API key
+      pt_BR: Get your Web of Science API key from Clarivate
+    url: https://developer.clarivate.com/apis
+tools:
+  - tools/wos_search.yaml
+extra:
+  python:
+    source: provider/wos.py

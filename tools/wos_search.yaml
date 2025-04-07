@@ -1,0 +1,154 @@
+identity:
+  name: wos_search
+  author: JiaWen Huang
+  label:
+    en_US: WOS Search
+    zh_Hans: WOS搜索
+    pt_BR: WOS Search
+description:
+  human:
+    en_US: A tool for performing Web of Science searches and extracting snippets and pages. Input should be a query that matches the WOS search format.
+    zh_Hans: 一个用于执行 Web of Science 搜索并提取片段和网页的工具。输入应为符合WOS搜索格式的查询。
+    pt_BR: A tool for performing Web of Science searches and extracting snippets and pages. Input should be a query that matches the WOS search format.
+  llm: A tool for performing a Google SERP search and extracting snippets and webpages.Input should be a search query.
+parameters:
+  - name: query
+    type: string
+    required: true
+    label:
+      en_US: Query string
+      zh_Hans: 查询语句
+      pt_BR: Query string
+    human_description:
+      en_US: used for searching
+      zh_Hans: 用于搜索WOS文章内容
+      pt_BR: used for searching
+    llm_description: key words for searching in Web of Science
+    form: llm
+  - name: query_type
+    type: select
+    required: true
+    options:
+      - value: TS
+        label:
+          en_US: topic
+          zh_Hans: 主题
+          pt_BR: topic
+      - value: TI
+        label:
+          en_US: title
+          zh_Hans: 标题
+          pt_BR: title
+      - value: AU
+        label:
+          en_US: author
+          zh_Hans: 作者
+          pt_BR: author
+      - value: DO
+        label:
+          en_US: DOI
+          zh_Hans: DOI
+          pt_BR: DOI
+      - value: ISSN
+        label:
+          en_US: ISSN
+          zh_Hans: ISSN
+          pt_BR: ISSN
+    default: TS
+    label:
+      en_US: Query type
+      zh_Hans: 搜索类型
+      pt_BR: Query type
+    human_description:
+      en_US: used for selecting the search type
+      zh_Hans: 用于选择搜索类型，主题, 标题, 作者, DOI, ISSN
+      pt_BR: used for selecting the search type
+    form: llm
+  - name: year
+    type: string
+    required: false
+    label:
+      en_US: publication year
+      zh_Hans: 发表年份
+      pt_BR: publication year
+    human_description:
+      en_US: search articles published in specific year(s)
+      zh_Hans: 搜索指定发表年限的文章
+      pt_BR: search articles published in specific year(s)
+    llm_description: search articles published in specific year(s)
+    form: llm
+  - name: document_type
+    type: select
+    required: false
+    options:
+      - value: All
+        label:
+          en_US: all document types
+          zh_Hans: 所有文档类型
+          pt_BR: all document types
+      - value: Article
+        label:
+          en_US: Article
+          zh_Hans: 文章
+          pt_BR: Article
+      - value: Review
+        label:
+          en_US: Review
+          zh_Hans: 综述
+          pt_BR: Review
+    default: all
+    label:
+      en_US: Document type
+      zh_Hans: 文档类型
+    human_description:
+      en_US: The type of document to filter the search results.
+      zh_Hans: 用于过滤搜索结果的文档类型。
+    llm_description: The type of document to filter the search results.
+    form: llm
+  - name: limit
+    type: number
+    required: false
+    label:
+      en_US: limit
+      zh_Hans: 搜索结果数
+      pt_BR: limit
+    human_description:
+      en_US: max number of results
+      zh_Hans: 页面搜索结果数
+      pt_BR: max number of results
+    form: llm
+    default: 50
+  - name: sort
+    type: select
+    required: true
+    options:
+      - value: LD+D
+        label:
+          en_US: Load Date
+          zh_Hans: 入库时间
+          pt_BR: Load Date
+      - value: PY+D
+        label:
+          en_US: Publication Year
+          zh_Hans: 发表时间
+          pt_BR: Publication Year
+      - value: RS+D
+        label:
+          en_US: Relevance
+          zh_Hans: 相关性
+          pt_BR: Relevance
+      - value: TC+D
+        label:
+          en_US: Times Cited
+          zh_Hans: 引用次数
+          pt_BR: Times Cited
+    default: RS+D
+    label:
+      en_US: Order by field
+      zh_Hans: 排序方式
+      pt_BR: Order by field
+    human_description:
+      en_US: Sorting of search results
+      zh_Hans: 检索结果的排序方式
+      pt_BR: Sorting of search results
+    form: form
