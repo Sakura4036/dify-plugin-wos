@@ -1,4 +1,3 @@
-import logging
 import time
 import traceback
 from datetime import datetime
@@ -7,8 +6,6 @@ import requests
 from collections.abc import Generator
 from dify_plugin import Tool
 from dify_plugin.entities.tool import ToolInvokeMessage
-from dify_plugin.errors.tool import ToolParameterValidationError
-logger = logging.getLogger(__name__)
 
 
 def check_type(document_type: str):
@@ -21,7 +18,7 @@ def check_type(document_type: str):
     if document_type in ['Article', 'Review']:
         return document_type
     else:
-        raise ToolParameterValidationError(f"Invalid publication type: {document_type}")
+        raise ValueError(f"Invalid publication type: {document_type}")
 
 
 class WosSearchAPI:
@@ -80,9 +77,9 @@ class WosSearchAPI:
                     # 'month': wos_document['source'].get('publishMonth'),
                     # https://webofscience.help.clarivate.com/en-us/Content/document-types.html
                     'types': wos_document.get('types', []),
-                    # 'link': wos_document['links'].get('record'),
-                    # 'keywords': wos_document['keywords'].get('authorKeywords'),
-                    # 'authors': [author['displayName'] for author in wos_document['names']['authors']],
+                    'link': wos_document['links'].get('record'),
+                    'keywords': wos_document['keywords'].get('authorKeywords'),
+                    'authors': [author['displayName'] for author in wos_document['names']['authors']],
                 }
                 result.append(document)
         return result
@@ -102,18 +99,14 @@ class WosSearchAPI:
         if limit <= 0:
             return 0, []
         request_str = f'{self.base_url}?q={query}&limit={limit}&page={page}&sortField={sort_field}&db={db}'
-        print(f"Web of Science API request: {request_str}")
         try:
             response = requests.get(request_str, headers={'X-ApiKey': self.wos_api_key})
         except Exception as e:
-            print(f"Web of Science API request failed: {e}")
             traceback.print_exc()
             return 0, []
         if response.status_code != 200:
-            print(f"Web of Science API request failed: {response.json()}")
             return 0, []
         response = response.json()
-        print("metadata:", response['metadata'])
         total = response['metadata']['total']
         data = self._process_response(response)
         return total, data
@@ -194,4 +187,4 @@ class WOSSearchTool(Tool):
 
         results = WosSearchAPI(api_key).search(query, query_type, year, document_type, limit, sort_field)
 
-        yield self.create_json_message(results)
+        yield [self.create_json_message(r) for r in results]
