@@ -10,6 +10,8 @@ identity:
     zh_Hans: Web of Science
     pt_BR: Web of Science
   icon: icon.svg
+  tags:
+    - search
 credentials_for_provider:
   wos_api_key:
     type: secret-input

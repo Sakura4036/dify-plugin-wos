@@ -152,3 +152,6 @@ parameters:
       zh_Hans: 检索结果的排序方式
       pt_BR: Sorting of search results
     form: form
+extra:
+  python:
+    source: tools/wos_search.py
