@@ -3,6 +3,8 @@ from typing import Any
 from dify_plugin import ToolProvider
 from dify_plugin.errors.tool import ToolProviderCredentialValidationError
 
+from tools.wos_search import WOSSearchTool
+
 
 class WosProvider(ToolProvider):
     def _validate_credentials(self, credentials: dict[str, Any]) -> None:
@@ -12,11 +14,9 @@ class WosProvider(ToolProvider):
                     "credentials": credentials,
                 }
             ).invoke(
-                user_id='',
                 tool_parameters={
                     "query": "test",
                     "query_type": "TS",
-                    "db": "WOS",
                     "limit": 10,
                     "page": 1
                 },
