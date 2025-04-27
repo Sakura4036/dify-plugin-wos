@@ -1,1 +1,3 @@
-dify_plugin~=0.0.1b72
+dify_plugin~=0.2.1
+datetime
+requests

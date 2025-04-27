@@ -1,6 +1,6 @@
-version: 0.0.1
+version: 0.0.2
 type: plugin
-author: hjw
+author: sakura4036
 name: wos
 label:
   en_US: wos
@@ -37,7 +37,7 @@ plugins:
   tools:
     - provider/wos.yaml
 meta:
-  version: 0.0.1
+  version: 0.0.2
   arch:
     - amd64
     - arm64

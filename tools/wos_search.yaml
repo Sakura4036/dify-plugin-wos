@@ -1,6 +1,6 @@
 identity:
   name: wos_search
-  author: JiaWen Huang
+  author: sakura4036
   label:
     en_US: WOS Search
     zh_Hans: WOS搜索
@@ -27,7 +27,7 @@ parameters:
     form: llm
   - name: query_type
     type: select
-    required: true
+    required: false
     options:
       - value: TS
         label:
@@ -117,10 +117,10 @@ parameters:
       zh_Hans: 页面搜索结果数
       pt_BR: max number of results
     form: llm
-    default: 50
+    default: 10
   - name: sort
     type: select
-    required: true
+    required: false
     options:
       - value: LD+D
         label:

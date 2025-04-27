@@ -54,8 +54,7 @@ class WosSearchAPI:
         query = "{}={}".format(query_type, self.check_query(query))
         return query
 
-    @staticmethod
-    def _process_response(response: dict) -> list[dict]:
+    def _process_response(self, response: dict) -> list[dict]:
         """
         Process response from Web of Science Search API.
         response example:
@@ -67,21 +66,63 @@ class WosSearchAPI:
                 identifiers = wos_document.get('identifiers')
                 if not identifiers:
                     continue
-                document = {
-                    'wos_uid': wos_document.get('uid'),
-                    'title': wos_document['title'],
-                    'doi': identifiers.get('doi', ''),
-                    # 'issn': wos_document['identifiers'].get('issn'),
-                    'pmid': identifiers.get('pmid', ''),
-                    'year': wos_document['source'].get('publishYear'),
-                    # 'month': wos_document['source'].get('publishMonth'),
-                    # https://webofscience.help.clarivate.com/en-us/Content/document-types.html
-                    'types': wos_document.get('types', []),
-                    'link': wos_document['links'].get('record'),
-                    'keywords': wos_document['keywords'].get('authorKeywords'),
-                    'authors': [author['displayName'] for author in wos_document['names']['authors']],
+                if wos_document.get('names'):
+                    authors = wos_document['names'].get('authors') or []
+                    authors = [au.get('displayName') for au in authors if au.get('displayName')]
+                    assert isinstance(authors, list), f"Invalid authors: {authors}"
+                else:
+                    authors = []
+                if wos_document.get('types'):
+                    types = wos_document['types']
+                    if isinstance(types, str):
+                        types = types.split(',')
+                    elif isinstance(types, list):
+                        types = types
+                    else:
+                        types = []
+                else:
+                    types = []
+
+                year = wos_document['source'].get('publishYear')  # 2021
+                month = wos_document['source'].get('publishMonth')  # NOV
+                # 将月份英文简写转换为数字
+                month_map = {
+                    'JAN': '01', 'FEB': '02', 'MAR': '03', 'APR': '04',
+                    'MAY': '05', 'JUN': '06', 'JUL': '07', 'AUG': '08',
+                    'SEP': '09', 'OCT': '10', 'NOV': '11', 'DEC': '12'
                 }
-                result.append(document)
+                if month and '-' in month:
+                    start_month, end_month = month.split('-')
+                    month = start_month
+                else:
+                    month = month_map.get(month, month) if month else month
+                try:
+                    if year and month:
+                        published_date = f"{year}-{month}"
+                        published_date = datetime.strptime(published_date, '%Y-%m').date().isoformat()
+                    else:
+                        published_date = None
+                except:
+                    published_date = None
+
+                format_paper = {
+                    # 'wos_uid': wos_document.get('uid'),
+                    'title': wos_document.get('title', ''),
+                    'abstract': wos_document.get('abstract', ''),
+                    'doi': identifiers.get('doi', ''),
+                    'pmid': identifiers.get('pmid', ''),
+                    # 'issn': identifiers.get('issn', ''),
+                    # 'eissn': identifiers.get('eissn', ''),
+                    'year': year,
+                    'published_date': published_date,
+                    # https://webofscience.help.clarivate.com/en-us/Content/document-types.html
+                    'types': types,
+                    'authors': authors,
+                    'journal': wos_document['source'].get('sourceTitle'),
+                    'volume': wos_document['source'].get('volume'),
+                    'issue': wos_document['source'].get('issue'),
+                }
+                result.append(format_paper)
         return result
 
     def query_once(self, query: str, limit: int = 50, page: int = 1, sort_field: str = 'RS+D', db: str = 'WOK') -> tuple[int, list[dict]]:
@@ -112,7 +153,7 @@ class WosSearchAPI:
         return total, data
 
     def search(self, query: str, query_type: str = 'TS', year: str = "", document_type: str = '',
-               num_results: int = 50, sort_field: str = 'RS+D') -> list[dict]:
+               num_results: int = 50, sort_field: str = 'RS+D') -> tuple[int, list[dict]]:
         """
         web of science api: https://api.clarivate.com/swagger-ui/?apikey=none&url=https%3A%2F%2Fdeveloper.clarivate.com%2Fapis%2Fwos-starter%2Fswagger
         query_type:
@@ -145,9 +186,10 @@ class WosSearchAPI:
         limit = min(num_results, self.limit)
         page = 1
         total, data = self.query_once(query, limit, page=page, sort_field=sort_field)
+        _total = total
 
         if total == 0:
-            return []
+            return 0, []
 
         result = data
         rest_num = min(num_results, total) - limit
@@ -161,9 +203,9 @@ class WosSearchAPI:
 
             result.extend(data)
             rest_num -= limit
-            time.sleep(10)
+            time.sleep(5)
 
-        return result
+        return _total, result
 
 
 class WOSSearchTool(Tool):
@@ -185,6 +227,9 @@ class WOSSearchTool(Tool):
         if not sort_field:
             sort_field = 'RS+D'
 
-        results = WosSearchAPI(api_key).search(query, query_type, year, document_type, limit, sort_field)
-
-        yield [self.create_json_message(r) for r in results]
+        total, data = WosSearchAPI(api_key).search(query, query_type, year, document_type, limit, sort_field)
+        print("data:", data[0])
+        yield self.create_json_message({
+            'total': total,
+            'data': data,
+        })
